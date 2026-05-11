@@ -287,9 +287,70 @@ function ContactForm() {
   );
 }
 
+function SkillCard({ skill }: { skill: string }) {
+  const ref = React.useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end start"]
+  });
+
+  const yIcon = useTransform(scrollYProgress, [0, 1], [15, -15]);
+
+  return (
+    <motion.div
+      ref={ref}
+      variants={{
+        hidden: { opacity: 0, y: 20 },
+        visible: { 
+          opacity: 1, 
+          y: 0,
+          transition: {
+            type: "spring",
+            stiffness: 100,
+            damping: 15
+          }
+        },
+        hover: {
+          y: -5,
+          borderColor: "rgba(255, 255, 255, 0.3)",
+          backgroundColor: "rgba(255, 255, 255, 0.05)",
+          transition: {
+            type: "spring",
+            stiffness: 400,
+            damping: 25
+          }
+        }
+      }}
+      whileHover="hover"
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true }}
+      className="p-6 border border-neutral-800 rounded-xl transition-all flex items-center gap-4 bg-neutral-950/50 cursor-default group"
+      id={`skill-${skill.toLowerCase()}`}
+    >
+      <motion.div
+        style={{ y: yIcon }}
+        variants={{
+          hover: { 
+            scale: 1.2, 
+            rotate: 5,
+            color: "#ffffff"
+          }
+        }}
+        transition={{ type: "spring", stiffness: 400, damping: 10 }}
+      >
+        <Terminal size={18} className="text-neutral-500 group-hover:text-white transition-colors" />
+      </motion.div>
+      <span className="font-medium text-neutral-300 group-hover:text-white transition-colors">{skill}</span>
+    </motion.div>
+  );
+}
+
 export default function App() {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [activeFilter, setActiveFilter] = useState("Alle");
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const detailsRef = React.useRef<HTMLElement>(null);
 
   const filteredProjects = DEFAULT_DATA.projects.filter(project => 
     activeFilter === "Alle" || project.category === activeFilter
@@ -310,6 +371,13 @@ export default function App() {
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const scrollToDetails = (project: Project) => {
+    setSelectedProject(project);
+    setTimeout(() => {
+      detailsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 100);
   };
 
   const { scrollYProgress } = useScroll();
@@ -526,11 +594,11 @@ export default function App() {
                 whileInView={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
                 whileHover={{ 
-                  y: -12, 
-                  scale: 1.02, 
-                  backgroundColor: "rgba(255, 255, 255, 0.05)",
-                  borderColor: "rgba(255, 255, 255, 0.2)",
-                  boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)"
+                  y: -8, 
+                  scale: 1.01, 
+                  backgroundColor: "rgba(255, 255, 255, 0.04)",
+                  borderColor: "rgba(255, 255, 255, 0.15)",
+                  boxShadow: "0 20px 40px -15px rgba(0, 0, 0, 0.6)"
                 }}
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ 
@@ -539,7 +607,7 @@ export default function App() {
                   scale: { type: "spring", stiffness: 400, damping: 10 },
                   opacity: { duration: 0.6 }
                 }}
-                className="group p-8 rounded-3xl border border-neutral-900 bg-neutral-950/50 transition-all cursor-pointer flex flex-col h-full"
+                className="group p-8 rounded-3xl border border-neutral-900 bg-neutral-950/50 transition-all cursor-default flex flex-col h-full"
                 id={`project-${project.id}`}
               >
                 <div className="flex justify-between items-start mb-8">
@@ -561,16 +629,128 @@ export default function App() {
                   {project.description}
                 </p>
 
-                <div className="pt-6 border-t border-neutral-900 flex items-center justify-between">
-                  <span className="text-xs font-mono uppercase tracking-widest text-neutral-600 group-hover:text-neutral-400 transition-colors">
-                    {project.link ? "Live ansehen" : "Projekt Details"}
-                  </span>
-                  <ChevronDown size={16} className="text-neutral-600 -rotate-90 group-hover:translate-x-1 transition-transform" />
+                <div className="flex flex-col gap-4">
+                  <button 
+                    onClick={() => scrollToDetails(project)}
+                    className="w-full py-4 px-6 rounded-xl border border-neutral-800 text-xs font-mono uppercase tracking-widest text-neutral-400 hover:text-white hover:border-neutral-500 transition-all flex items-center justify-between group/btn"
+                  >
+                    Details ansehen
+                    <ChevronDown size={14} className="transform -rotate-90 group-hover/btn:translate-x-1 transition-transform" />
+                  </button>
+                  
+                  {project.link && (
+                    <a 
+                      href={project.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full py-4 px-6 rounded-xl bg-white text-black text-xs font-mono uppercase tracking-widest font-bold hover:bg-neutral-200 transition-all flex items-center justify-center gap-2"
+                    >
+                      Live Demo
+                    </a>
+                  )}
                 </div>
               </motion.div>
             ))}
           </AnimatePresence>
         </div>
+      </section>
+
+      {/* Project Details Placeholder Section */}
+      <section 
+        id="project-details" 
+        ref={detailsRef}
+        className="py-10 scroll-mt-24"
+      >
+        <AnimatePresence mode="wait">
+          {selectedProject ? (
+            <motion.div
+              key={selectedProject.id}
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -50 }}
+              className="max-w-7xl mx-auto px-6"
+            >
+              <div className="bg-neutral-900/50 rounded-[40px] p-12 md:p-20 border border-neutral-800 relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-10 opacity-5 pointer-events-none">
+                  <Terminal size={300} />
+                </div>
+                
+                <div className="relative z-10">
+                  <div className="flex items-center gap-4 mb-8">
+                    <span className="px-4 py-1 rounded-full border border-neutral-700 font-mono text-[10px] uppercase tracking-widest text-neutral-400">
+                      {selectedProject.category}
+                    </span>
+                    <div className="h-[1px] w-12 bg-neutral-800" />
+                    <span className="text-neutral-500 font-mono text-[10px] uppercase tracking-widest">
+                      ID: {selectedProject.id}
+                    </span>
+                  </div>
+
+                  <h2 className="text-4xl md:text-7xl font-display font-bold mb-10 tracking-tighter leading-tight">
+                    {selectedProject.title}
+                  </h2>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+                    <div>
+                      <p className="text-xl text-neutral-300 leading-relaxed italic mb-10 font-light">
+                        {selectedProject.description}
+                      </p>
+                      
+                      <div className="flex flex-wrap gap-3 mb-10">
+                        {selectedProject.tech.map(t => (
+                          <span key={t} className="px-3 py-1 rounded-lg bg-neutral-800 text-xs font-mono text-neutral-400 uppercase">
+                            {t}
+                          </span>
+                        ))}
+                      </div>
+
+                      <div className="p-8 rounded-2xl bg-neutral-950 border border-neutral-800">
+                        <h4 className="text-sm font-mono uppercase tracking-widest text-neutral-500 mb-4">Projekt Status</h4>
+                        <div className="flex items-center gap-2 text-green-500">
+                          <CheckCircle2 size={16} />
+                          <span className="text-sm">Abgeschlossen / In Produktion</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col justify-end gap-6">
+                      <p className="text-neutral-500 text-sm leading-relaxed max-w-sm mb-4">
+                        Dies ist eine detaillierte Übersicht des Projekts. Hier könnten weitere Informationen wie Herausforderungen, Lösungen und Metriken stehen.
+                      </p>
+                      
+                      <div className="flex flex-col sm:flex-row gap-4">
+                        {selectedProject.link && (
+                          <a 
+                            href={selectedProject.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="bg-white text-black px-8 py-4 rounded-xl font-bold hover:bg-neutral-200 transition-all text-center flex-1"
+                          >
+                            Live Demo besuchen
+                          </a>
+                        )}
+                        <button 
+                          onClick={() => setSelectedProject(null)}
+                          className="border border-neutral-800 px-8 py-4 rounded-xl font-bold hover:bg-neutral-800 transition-all text-center flex-1"
+                        >
+                          Schließen
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center py-20 text-neutral-800 italic"
+            >
+              <p>Wähle ein Projekt aus, um Details zu sehen.</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </section>
 
       {/* Skills Section */}
@@ -598,27 +778,7 @@ export default function App() {
             className="grid grid-cols-2 md:grid-cols-4 gap-4"
           >
             {DEFAULT_DATA.skills.map((skill) => (
-              <motion.div
-                key={skill}
-                variants={{
-                  hidden: { opacity: 0, y: 20 },
-                  visible: { 
-                    opacity: 1, 
-                    y: 0,
-                    transition: {
-                      type: "spring",
-                      stiffness: 100,
-                      damping: 15
-                    }
-                  }
-                }}
-                whileHover={{ y: -5, borderColor: "rgba(255, 255, 255, 0.3)", backgroundColor: "rgba(255, 255, 255, 0.05)" }}
-                className="p-6 border border-neutral-800 rounded-xl transition-all flex items-center gap-4 bg-neutral-950/50 cursor-default"
-                id={`skill-${skill.toLowerCase()}`}
-              >
-                <Terminal size={18} className="text-neutral-500" />
-                <span className="font-medium text-neutral-300">{skill}</span>
-              </motion.div>
+              <SkillCard key={skill} skill={skill} />
             ))}
           </motion.div>
         </div>

@@ -1,20 +1,23 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Flazzy.de - Portfolio
 
-# Run and deploy your AI Studio app
+Dieses Repository enthält den Quellcode für das persönliche Portfolio von **Flazzy** (Odin Dreier). Es wurde entwickelt, um ein breites Spektrum an technischen Projekten, von Web-Anwendungen bis hin zu System-Tools und Hosting-Lösungen, visuell ansprechend zu präsentieren.
 
-This contains everything you need to run your app locally.
+## 🚀 Überblick
 
-View your app in AI Studio: https://ai.studio/apps/c9615ca7-0c8f-4ee8-ae60-58c7fe5352a4
+Das Portfolio dient als zentraler Hub für:
+- **Web-Entwicklung:** Innovative Plattformen wie WebAI und E2E Chat.
+- **Hosting-Services:** Cloud-Management für Nextcloud, Odoo und Datenbanken.
+- **Gaming & Communities:** Spezialisierte Tools und Simulationen für die FiveM-Plattform.
+- **System-Software:** Eigenentwicklungen wie Flazzy OS und Cheat-Detection-Systeme.
 
-## Run Locally
+## 🛠️ Technologien
 
-**Prerequisites:**  Node.js
+Eingesetzt wurden moderne Technologien für maximale Performance und eine flüssige UX:
+- **Frontend:** React, Vite, Tailwind CSS, Motion
+- **Backend:** Node.js, Express, Supabase
+- **System:** Debian Linux, Docker, Pterodactyl
 
+---
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+🤖 **Generiert von Flazzy KI**
+*Präzision & Flair in jeder Zeile Code.*
