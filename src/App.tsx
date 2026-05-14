@@ -5,6 +5,7 @@ import {
   Terminal, 
   ChevronDown,
   Send,
+  MessageSquare,
   CheckCircle2,
   Loader2,
   ArrowUp
@@ -20,6 +21,9 @@ interface Project {
   category: string;
   link?: string;
   github?: string;
+  status?: string;
+  discordInvite?: string;
+  featured?: boolean;
 }
 
 interface PortfolioData {
@@ -43,6 +47,59 @@ const DEFAULT_DATA: PortfolioData = {
   skills: ["React", "TypeScript", "Node.js", "Tailwind CSS", "Python", "Lua", "Debian", "Linux", "Supabase", "VSCode", "Antigravity", "Docker"],
   categories: ["Alle", "FiveM", "Web", "Hosting", "System", "Bots", "Tools"],
   projects: [
+    {
+      id: "relay",
+      featured: true,
+      category: "Web",
+      title: "Relay by Flazzy",
+      description: "Ein hochmoderner Discord-Klon für Echtzeit-Kommunikation. Bietet Server, Channels, Direktnachrichten, Emoji-Reaktionen und ein ausgeklügeltes Invite-System.",
+      tech: ["React", "TypeScript", "Supabase", "Tailwind"],
+      link: "https://relay.flazzy.de",
+      discordInvite: "https://discord.gg/TQs6McKJJs",
+      status: "In Entwicklung"
+    },
+    {
+      id: "flazzydj",
+      category: "Tools",
+      title: "FlazzyDJ",
+      description: "Ein intelligentes Python-Tool, das Demucs für die Stem-Separation nutzt und die Claude API als 'DJ-Brain' verwendet, um Musik dynamisch zu analysieren und zu mixen.",
+      tech: ["Python", "Demucs", "Claude API"]
+    },
+    {
+      id: "nsrp-bot",
+      category: "Bots",
+      title: "NSRP Discord Bot",
+      description: "Ein umfangreicher Discord-Bot mit über 4700 Zeilen Code und 12 Cogs. Unterstützt thread-safe JSON-Datenhaltung und ist auf die Europe/Berlin Zeitzone optimiert.",
+      tech: ["Python", "discord.py"]
+    },
+    {
+      id: "flazzy-hub",
+      category: "Web",
+      title: "Flazzy Hub",
+      description: "Eine Gaming-Plattform im Browser, die über die GameDistribution API eine Vielzahl von Spielen bereitstellt und AdSense für die Monetarisierung integriert.",
+      tech: ["React", "GameDistribution API"]
+    },
+    {
+      id: "content-engine",
+      category: "Tools",
+      title: "Content Engine 2026",
+      description: "Ein umfassendes E-Book, das über Gumroad in deutscher und englischer Sprache vertrieben wird und wertvolle Insights für die digitale Zukunft bietet.",
+      tech: ["Gumroad", "PDF"]
+    },
+    {
+      id: "gdpr-cog",
+      category: "Bots",
+      title: "GDPR Discord Cog",
+      description: "Ein spezialisiertes Modul für Discord-Bots, das DSGVO-konforme Datenabfragen (/meine-daten) mit HTML-Export und Live-Progress-Embeds ermöglicht.",
+      tech: ["Python", "discord.py"]
+    },
+    {
+      id: "egs-portal",
+      category: "Web",
+      title: "EGS Delbrück Portal",
+      description: "Eine moderne Schul-Lernplattform mit interaktiven Quizzes, einem digitalen Sitzplan-Planer und einem Whiteboard für kollaboratives Lernen.",
+      tech: ["React", "Supabase", "Flask-SocketIO", "Cloudflare Pages"]
+    },
     {
       id: "nc",
       category: "Hosting",
@@ -287,7 +344,7 @@ function ContactForm() {
   );
 }
 
-function SkillCard({ skill }: { skill: string }) {
+function SkillCard({ skill }: { skill: string, key?: string }) {
   const ref = React.useRef(null);
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -607,19 +664,30 @@ export default function App() {
                   scale: { type: "spring", stiffness: 400, damping: 10 },
                   opacity: { duration: 0.6 }
                 }}
-                className="group p-8 rounded-3xl border border-neutral-900 bg-neutral-950/50 transition-all cursor-default flex flex-col h-full"
+                className={`group p-8 rounded-3xl border transition-all cursor-default flex flex-col h-full ${
+                  project.featured 
+                  ? "border-neutral-700 bg-neutral-900/40 col-span-1 md:col-span-2 lg:col-span-2" 
+                  : "border-neutral-900 bg-neutral-950/50"
+                }`}
                 id={`project-${project.id}`}
               >
                 <div className="flex justify-between items-start mb-8">
-                  <div className="p-3 rounded-2xl bg-neutral-900 text-neutral-400 group-hover:text-white transition-colors">
+                  <div className={`p-3 rounded-2xl ${project.featured ? "bg-neutral-800 text-white" : "bg-neutral-900 text-neutral-400"} group-hover:text-white transition-colors`}>
                     <Terminal size={24} />
                   </div>
-                  <div className="flex flex-wrap gap-2 justify-end">
-                    {project.tech.map(t => (
-                      <span key={t} className="text-[10px] font-mono border border-neutral-800 px-2 py-1 rounded text-neutral-500 uppercase tracking-tighter">
-                        {t}
+                  <div className="flex flex-col items-end gap-2">
+                    <div className="flex flex-wrap gap-2 justify-end">
+                      {project.tech.map(t => (
+                        <span key={t} className="text-[10px] font-mono border border-neutral-800 px-2 py-1 rounded text-neutral-500 uppercase tracking-tighter">
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                    {project.status && (
+                      <span className="text-[9px] font-mono bg-neutral-800 text-neutral-400 px-2 py-1 rounded uppercase tracking-[0.1em]">
+                        {project.status}
                       </span>
-                    ))}
+                    )}
                   </div>
                 </div>
                 
@@ -638,16 +706,30 @@ export default function App() {
                     <ChevronDown size={14} className="transform -rotate-90 group-hover/btn:translate-x-1 transition-transform" />
                   </button>
                   
-                  {project.link && (
-                    <a 
-                      href={project.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full py-4 px-6 rounded-xl bg-white text-black text-xs font-mono uppercase tracking-widest font-bold hover:bg-neutral-200 transition-all flex items-center justify-center gap-2"
-                    >
-                      Live Demo
-                    </a>
-                  )}
+                  <div className="grid grid-cols-2 gap-4">
+                    {project.discordInvite && (
+                      <a 
+                        href={project.discordInvite}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="py-4 px-6 rounded-xl bg-[#5865F2] text-white text-xs font-mono uppercase tracking-widest font-bold hover:bg-[#4752c4] transition-all flex items-center justify-center gap-2"
+                      >
+                        <MessageSquare size={14} />
+                        Discord
+                      </a>
+                    )}
+                    
+                    {project.link && (
+                      <a 
+                        href={project.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="py-4 px-6 rounded-xl bg-white text-black text-xs font-mono uppercase tracking-widest font-bold hover:bg-neutral-200 transition-all flex items-center justify-center gap-2"
+                      >
+                        Demo
+                      </a>
+                    )}
+                  </div>
                 </div>
               </motion.div>
             ))}
@@ -706,32 +788,48 @@ export default function App() {
 
                       <div className="p-8 rounded-2xl bg-neutral-950 border border-neutral-800">
                         <h4 className="text-sm font-mono uppercase tracking-widest text-neutral-500 mb-4">Projekt Status</h4>
-                        <div className="flex items-center gap-2 text-green-500">
-                          <CheckCircle2 size={16} />
-                          <span className="text-sm">Abgeschlossen / In Produktion</span>
+                        <div className={`flex items-center gap-2 ${selectedProject.status?.includes('Entwicklung') ? 'text-amber-500' : 'text-green-500'}`}>
+                          {selectedProject.status?.includes('Entwicklung') ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
+                          <span className="text-sm">{selectedProject.status || 'Abgeschlossen / In Produktion'}</span>
                         </div>
                       </div>
                     </div>
 
                     <div className="flex flex-col justify-end gap-6">
                       <p className="text-neutral-500 text-sm leading-relaxed max-w-sm mb-4">
-                        Dies ist eine detaillierte Übersicht des Projekts. Hier könnten weitere Informationen wie Herausforderungen, Lösungen und Metriken stehen.
+                        {selectedProject.id === 'relay' 
+                          ? "Relay befindet sich aktuell in der aktiven Entwicklungsphase. Tritt dem Discord-Server bei, um exklusive Einblicke und Updates zu erhalten."
+                          : "Dies ist eine detaillierte Übersicht des Projekts. Hier könnten weitere Informationen wie Herausforderungen, Lösungen und Metriken stehen."
+                        }
                       </p>
                       
-                      <div className="flex flex-col sm:flex-row gap-4">
+                      <div className="flex flex-col gap-4">
                         {selectedProject.link && (
                           <a 
                             href={selectedProject.link}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="bg-white text-black px-8 py-4 rounded-xl font-bold hover:bg-neutral-200 transition-all text-center flex-1"
+                            className="bg-white text-black px-8 py-4 rounded-xl font-bold hover:bg-neutral-200 transition-all text-center flex items-center justify-center gap-2"
                           >
                             Live Demo besuchen
                           </a>
                         )}
+                        
+                        {selectedProject.discordInvite && (
+                          <a 
+                            href={selectedProject.discordInvite}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="bg-[#5865F2] text-white px-8 py-4 rounded-xl font-bold hover:bg-[#4752c4] transition-all text-center flex items-center justify-center gap-2"
+                          >
+                            <MessageSquare size={18} />
+                            Discord Server joinen
+                          </a>
+                        )}
+
                         <button 
                           onClick={() => setSelectedProject(null)}
-                          className="border border-neutral-800 px-8 py-4 rounded-xl font-bold hover:bg-neutral-800 transition-all text-center flex-1"
+                          className="border border-neutral-800 px-8 py-4 rounded-xl font-bold hover:bg-neutral-800 transition-all text-center"
                         >
                           Schließen
                         </button>
