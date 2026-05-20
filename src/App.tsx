@@ -45,22 +45,22 @@ interface PortfolioData {
 
 // Initial placeholder data
 const DEFAULT_DATA: PortfolioData = {
-  name: "Flazzy",
-  tagline: "Digitale Erlebnisse mit Präzision & Flair",
-  bio: "Ich bin ein Software-Entwickler mit Fokus auf saubere, performante und nutzerzentrierte Anwendungen. Ich liebe es, komplexe Probleme mit elegantem Code zu lösen.",
+  name: "Odin (Flazzy)",
+  tagline: "Leidenschaftlicher Programmierer & Tech-Enthusiast",
+  bio: "Hi, ich bin Odin – 13 Jahre alt und leidenschaftlicher Entwickler. Für mich bedeutet Programmieren, visionäre Ideen durch Code zum Leben zu erwecken. Von hochmodernen Web-Plattformen über intelligente Discord-Bots bis hin zu komplexen IT-Infrastrukturen erschaffe ich innovative Software-Lösungen mit unbändigem Tatendrang und absolutem Fokus auf Clean Code.",
   skills: ["React", "TypeScript", "Node.js", "Tailwind CSS", "Python", "Lua", "Debian", "Linux", "Supabase", "VSCode", "Antigravity", "Docker"],
   categories: ["Alle", "FiveM", "Web", "Hosting", "System", "Bots", "Tools"],
   projects: [
     {
-      id: "relay",
+      id: "cloun",
       featured: true,
       category: "Web",
-      title: "Relay by Flazzy",
+      title: "Cloun by Flazzy",
       description: "Ein hochmoderner Discord-Klon für Echtzeit-Kommunikation. Bietet Server, Channels, Direktnachrichten, Emoji-Reaktionen und ein ausgeklügeltes Invite-System.",
       tech: ["React", "TypeScript", "Supabase", "Tailwind"],
-      link: "https://relay.flazzy.de",
+      link: "https://cloun.flazzy.de",
       discordInvite: "https://discord.gg/TQs6McKJJs",
-      status: "In Entwicklung"
+      status: "Early Access / In Entwicklung"
     },
     {
       id: "flazzydj",
@@ -199,9 +199,10 @@ const DEFAULT_DATA: PortfolioData = {
       id: "9",
       category: "Web",
       title: "WebAI",
-      description: "Eine KI-gestützte Plattform für innovative Web-Services und intelligente Automatisierung.",
+      description: "Eine KI-gestützte Plattform für innovative Web-Services und intelligente Automatisierung. (Eingestellt — kann über meine E-Mail für Interessenten angefragt werden)",
       tech: ["React", "Gemini API", "Tailwind"],
-      link: "https://webai.flazzy.de"
+      link: "mailto:info@flazzy.de?subject=Interesse%20an%20WebAI",
+      status: "Eingestellt (Per E-Mail anfragbar)"
     },
     {
       id: "10",
@@ -315,6 +316,14 @@ const CERTIFICATES_DATA: Certificate[] = [
     verificationUrl: "https://www.credly.com/badges/6936701a-6e9e-47b3-92fa-60a3595aafc5",
     isIframe: true,
     iframeSrc: "https://www.credly.com/embedded_badge/6936701a-6e9e-47b3-92fa-60a3595aafc5"
+  },
+  {
+    id: "cisco-cybersec",
+    company: "Cisco",
+    title: "Cisco Cybersecurity Badge",
+    verificationUrl: "https://www.credly.com/badges/f88c4876-bdbc-4378-99c2-bb2979ebe7d2",
+    isIframe: true,
+    iframeSrc: "https://www.credly.com/embedded_badge/f88c4876-bdbc-4378-99c2-bb2979ebe7d2"
   }
 ];
 
@@ -806,11 +815,11 @@ export default function App() {
                     {project.link && (
                       <a 
                         href={project.link}
-                        target="_blank"
+                        target={project.link.startsWith("mailto:") ? "_self" : "_blank"}
                         rel="noopener noreferrer"
                         className="py-4 px-6 rounded-xl bg-white text-black text-xs font-mono uppercase tracking-widest font-bold hover:bg-neutral-200 transition-all flex items-center justify-center gap-2"
                       >
-                        Demo
+                        {project.link.startsWith("mailto:") ? "Anfragen" : "Demo"}
                       </a>
                     )}
                   </div>
@@ -881,8 +890,10 @@ export default function App() {
 
                     <div className="flex flex-col justify-end gap-4 sm:gap-6">
                       <p className="text-neutral-500 text-xs sm:text-sm leading-relaxed max-w-sm mb-2 sm:mb-4">
-                        {selectedProject.id === 'relay' 
-                          ? "Relay befindet sich aktuell in der aktiven Entwicklungsphase. Tritt dem Discord-Server bei, um exklusive Einblicke und Updates zu erhalten."
+                        {selectedProject.id === 'cloun' 
+                          ? "Cloun befindet sich aktuell in der aktiven Entwicklungsphase (Early Access). Tritt dem Discord-Server bei, um exklusive Einblicke und Updates zu erhalten."
+                          : selectedProject.id === '9'
+                          ? "WebAI wurde als eigenständige Plattform eingestellt. Da ich das Projekt dennoch sehr schätze, steht die gesamte Codebase weiterhin zur Verfügung und kann bei ernsthaftem Interesse einfach per E-Mail angefragt werden."
                           : "Dies ist eine detaillierte Übersicht des Projekts. Hier könnten weitere Informationen wie Herausforderungen, Lösungen und Metriken stehen."
                         }
                       </p>
@@ -891,11 +902,11 @@ export default function App() {
                         {selectedProject.link && (
                           <a 
                             href={selectedProject.link}
-                            target="_blank"
+                            target={selectedProject.link.startsWith("mailto:") ? "_self" : "_blank"}
                             rel="noopener noreferrer"
                             className="bg-white text-black px-6 py-3.5 rounded-xl font-bold hover:bg-neutral-200 transition-all text-center flex items-center justify-center gap-2 text-xs sm:text-sm uppercase tracking-wider font-mono shadow-md"
                           >
-                            Live Demo besuchen
+                            {selectedProject.link.startsWith("mailto:") ? "Projekt per E-Mail anfragen" : "Live Demo besuchen"}
                           </a>
                         )}
                         
@@ -985,18 +996,17 @@ export default function App() {
 
       {/* Watermark */}
       <motion.a
-        href="https://webai.flazzy.de"
-        target="_blank"
-        rel="noopener noreferrer"
+        href="mailto:info@flazzy.de?subject=Interesse%20an%20WebAI"
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
         whileHover={{ scale: 1.05 }}
-        className="fixed bottom-4 left-4 sm:bottom-6 sm:left-6 z-50 flex items-center gap-2 bg-neutral-900/80 backdrop-blur-md border border-neutral-800 px-3.5 py-2 rounded-full shadow-2xl group hover:border-neutral-500 transition-all"
+        className="fixed bottom-4 left-4 sm:bottom-6 sm:left-6 z-50 flex items-center gap-2 bg-neutral-900/80 backdrop-blur-md border border-neutral-800 px-3.5 py-3 rounded-full shadow-2xl group hover:border-neutral-500 transition-all text-neutral-400 hover:text-white"
         id="flazzy-watermark"
+        title="WebAI anfragen via E-Mail"
       >
-        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-neutral-500 group-hover:bg-white animate-pulse transition-colors" />
+        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-amber-500 group-hover:bg-amber-400 animate-pulse transition-colors" />
         <span className="text-[9px] sm:text-[10px] font-mono tracking-widest text-neutral-500 group-hover:text-white uppercase transition-colors">
-          Flazzy Web AI
+          WebAI Anfragen ✉
         </span>
       </motion.a>
 
