@@ -239,7 +239,7 @@ const DEFAULT_DATA: PortfolioData = {
   }
 };
 
-function SkillCard({ skill, key }: { skill: string, key?: string }) {
+function SkillCard({ skill }: { skill: string; key?: React.Key }) {
   const ref = React.useRef(null);
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -649,7 +649,6 @@ export default function App() {
                       <div className="w-[150px] h-[270px] flex items-center justify-center">
                         <iframe 
                           name="acclaim-badge" 
-                          allowTransparency 
                           frameBorder="0" 
                           id={`embedded-badge-${cert.id}`} 
                           scrolling="no" 
