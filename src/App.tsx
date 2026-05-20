@@ -8,7 +8,10 @@ import {
   MessageSquare,
   CheckCircle2,
   Loader2,
-  ArrowUp
+  ArrowUp,
+  Award,
+  Menu,
+  X
 } from "lucide-react";
 import React, { useState, useEffect } from "react";
 
@@ -38,6 +41,7 @@ interface PortfolioData {
     email: string;
   };
 }
+
 
 // Initial placeholder data
 const DEFAULT_DATA: PortfolioData = {
@@ -235,116 +239,7 @@ const DEFAULT_DATA: PortfolioData = {
   }
 };
 
-function ContactForm() {
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-  const [formData, setFormData] = useState({ name: '', email: '', message: '' });
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setStatus('loading');
-
-    try {
-      const res = await fetch('/api/contact', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-
-      if (res.ok) {
-        setStatus('success');
-        setFormData({ name: '', email: '', message: '' });
-      } else {
-        setStatus('error');
-      }
-    } catch (err) {
-      setStatus('error');
-    }
-  };
-
-  return (
-    <div className="w-full max-w-xl mx-auto text-left bg-neutral-900/50 p-8 rounded-3xl border border-neutral-800">
-      <AnimatePresence mode="wait">
-        {status === 'success' ? (
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="flex flex-col items-center py-10"
-          >
-            <CheckCircle2 size={64} className="text-green-500 mb-6" />
-            <h3 className="text-2xl font-bold mb-2">Nachricht gesendet!</h3>
-            <p className="text-neutral-400 text-center">Danke für deine Nachricht. Ich melde mich in Kürze bei dir.</p>
-            <button 
-              onClick={() => setStatus('idle')}
-              className="mt-8 text-sm font-mono uppercase tracking-widest text-neutral-500 hover:text-white transition-colors"
-            >
-              Weitere Nachricht senden
-            </button>
-          </motion.div>
-        ) : (
-          <motion.form 
-            initial={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onSubmit={handleSubmit} 
-            className="space-y-6"
-          >
-            <div className="space-y-2">
-              <label className="text-xs font-mono uppercase tracking-widest text-neutral-500 ml-1">Dein Name</label>
-              <input
-                required
-                type="text"
-                placeholder="Max Mustermann"
-                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 focus:outline-none focus:border-white transition-colors"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-xs font-mono uppercase tracking-widest text-neutral-500 ml-1">E-Mail Adresse</label>
-              <input
-                required
-                type="email"
-                placeholder="max@beispiel.de"
-                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 focus:outline-none focus:border-white transition-colors"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-xs font-mono uppercase tracking-widest text-neutral-500 ml-1">Nachricht</label>
-              <textarea
-                required
-                rows={4}
-                placeholder="Wie kann ich dir helfen?"
-                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 focus:outline-none focus:border-white transition-colors resize-none"
-                value={formData.message}
-                onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={status === 'loading'}
-              className="w-full bg-white text-black font-bold py-4 rounded-xl flex items-center justify-center gap-3 hover:bg-neutral-200 transition-colors disabled:opacity-50"
-            >
-              {status === 'loading' ? (
-                <Loader2 className="animate-spin" />
-              ) : (
-                <>
-                  <Send size={18} />
-                  Nachricht absenden
-                </>
-              )}
-            </button>
-            {status === 'error' && (
-              <p className="text-red-500 text-sm italic text-center">Etwas ist schiefgelaufen. Bitte versuche es erneut.</p>
-            )}
-          </motion.form>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
-
-function SkillCard({ skill }: { skill: string, key?: string }) {
+function SkillCard({ skill, key }: { skill: string, key?: string }) {
   const ref = React.useRef(null);
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -382,7 +277,7 @@ function SkillCard({ skill }: { skill: string, key?: string }) {
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true }}
-      className="p-6 border border-neutral-800 rounded-xl transition-all flex items-center gap-4 bg-neutral-950/50 cursor-default group"
+      className="p-4 sm:p-6 border border-neutral-800 rounded-xl transition-all flex items-center gap-3 sm:gap-4 bg-neutral-950/50 cursor-default group"
       id={`skill-${skill.toLowerCase()}`}
     >
       <motion.div
@@ -403,14 +298,40 @@ function SkillCard({ skill }: { skill: string, key?: string }) {
   );
 }
 
+interface Certificate {
+  id: string;
+  company: string;
+  title: string;
+  verificationUrl: string;
+  isIframe: boolean;
+  iframeSrc?: string;
+}
+
+const CERTIFICATES_DATA: Certificate[] = [
+  {
+    id: "cisco-ccst",
+    company: "Cisco",
+    title: "Cisco Certified Support Technician (CCST) Networking",
+    verificationUrl: "https://www.credly.com/badges/6936701a-6e9e-47b3-92fa-60a3595aafc5",
+    isIframe: true,
+    iframeSrc: "https://www.credly.com/embedded_badge/6936701a-6e9e-47b3-92fa-60a3595aafc5"
+  }
+];
+
 export default function App() {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [activeFilter, setActiveFilter] = useState("Alle");
+  const [activeCertFilter, setActiveCertFilter] = useState("Alle");
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const detailsRef = React.useRef<HTMLElement>(null);
 
   const filteredProjects = DEFAULT_DATA.projects.filter(project => 
     activeFilter === "Alle" || project.category === activeFilter
+  );
+
+  const filteredCertificates = CERTIFICATES_DATA.filter(cert =>
+    activeCertFilter === "Alle" || cert.company === activeCertFilter
   );
 
   useEffect(() => {
@@ -495,19 +416,15 @@ export default function App() {
       {/* Navigation */}
       <nav className="fixed top-0 w-full z-40 bg-neutral-950/80 backdrop-blur-md border-b border-neutral-900">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <motion.span 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="font-display font-bold text-xl tracking-tighter"
-          >
+          <a href="#" className="font-display font-bold text-xl tracking-tighter hover:opacity-80 transition-opacity">
             FLAZZY<span className="text-neutral-500">.DE</span>
-          </motion.span>
+          </a>
           
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-neutral-400">
-            {["Projekte", "Über", "Skills", "Kontakt"].map((item) => (
+            {["Zertifikate", "Projekte", "Skills"].map((item) => (
               <a 
                 key={item} 
-                href={`#${item === "Projekte" ? "work" : item.toLowerCase()}`}
+                href={`#${item === "Projekte" ? "work" : item === "Zertifikate" ? "certificates" : item.toLowerCase()}`}
                 className="hover:text-white transition-colors"
                 id={`nav-${item.toLowerCase()}`}
               >
@@ -516,18 +433,81 @@ export default function App() {
             ))}
           </div>
 
-          <a 
-            href="#contact"
-            className="bg-white text-black px-4 py-2 rounded-full text-sm font-bold hover:bg-neutral-200 transition-colors"
-            id="nav-hire-me"
+          <div className="hidden md:block">
+            <a 
+              href={`mailto:${DEFAULT_DATA.socials.email}`}
+              className="bg-white text-black px-4 py-2 rounded-full text-sm font-bold hover:bg-neutral-200 transition-all"
+              id="nav-hire-me"
+            >
+              Kontaktieren
+            </a>
+          </div>
+
+          <button 
+            type="button"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="md:hidden p-2 text-neutral-400 hover:text-white transition-colors focus:outline-none"
+            aria-label="Menü öffnen"
           >
-            Kontaktieren
-          </a>
+            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
         </div>
+
+        {/* Mobile Navigation Drawer Outline */}
+        <AnimatePresence>
+          {isMenuOpen && (
+            <motion.div 
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.25, ease: "easeInOut" }}
+              className="w-full bg-neutral-950/95 border-b border-neutral-900 md:hidden overflow-hidden backdrop-blur-xl absolute top-16 left-0 right-0 z-30"
+            >
+              <div className="px-6 py-8 flex flex-col gap-6 text-left">
+                {["Zertifikate", "Projekte", "Skills"].map((item, idx) => (
+                  <motion.a 
+                    key={item}
+                    href={`#${item === "Projekte" ? "work" : item === "Zertifikate" ? "certificates" : item.toLowerCase()}`}
+                    onClick={() => setIsMenuOpen(false)}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: idx * 0.08 }}
+                    className="font-display text-2xl font-bold tracking-tight text-neutral-300 hover:text-white transition-colors pb-2 border-b border-neutral-900/40"
+                  >
+                    {item}
+                  </motion.a>
+                ))}
+                
+                <motion.div 
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.25 }}
+                  className="pt-2 flex flex-col gap-3"
+                >
+                  <a 
+                    href={`mailto:${DEFAULT_DATA.socials.email}`}
+                    className="w-full py-3.5 rounded-xl bg-white text-black text-center font-bold text-sm tracking-wider uppercase font-mono shadow-md hover:bg-neutral-200 transition-colors"
+                  >
+                    Kontaktieren
+                  </a>
+                  <a 
+                    href={DEFAULT_DATA.socials.github} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="w-full py-3.5 rounded-xl border border-neutral-800 text-neutral-400 text-center font-bold text-sm tracking-wider uppercase font-mono hover:bg-neutral-900/50 transition-colors flex items-center justify-center gap-2"
+                  >
+                    <Github size={16} />
+                    GitHub Profil
+                  </a>
+                </motion.div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </nav>
 
       {/* Hero Section */}
-      <section className="relative pt-48 pb-32 px-6 max-w-7xl mx-auto flex flex-col items-center text-center z-10">
+      <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 px-4 sm:px-6 max-w-7xl mx-auto flex flex-col items-center text-center z-10">
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -536,14 +516,14 @@ export default function App() {
         >
           <motion.span 
             variants={itemVariants}
-            className="inline-block py-1 px-4 mb-8 rounded-full border border-neutral-800 text-[10px] font-mono tracking-[0.2em] text-neutral-500 uppercase bg-neutral-950/50 backdrop-blur-sm"
+            className="inline-block py-1.5 px-3.5 mb-6 md:mb-8 rounded-full border border-neutral-800 text-[10px] font-mono tracking-[0.2em] text-neutral-500 uppercase bg-neutral-950/50 backdrop-blur-sm"
           >
             Verfügbar für neue Herausforderungen
           </motion.span>
           
-          <h1 className="font-display text-6xl md:text-9xl font-bold tracking-tighter leading-[0.9] mb-10 overflow-hidden">
+          <h1 className="font-display text-4xl sm:text-7xl md:text-9xl font-bold tracking-tighter leading-[1.05] md:leading-[0.9] mb-6 md:mb-10 overflow-hidden">
             {DEFAULT_DATA.tagline.split(" ").map((word, i) => (
-              <span key={i} className="inline-block overflow-hidden pb-2 mr-[0.2em]">
+              <span key={i} className="inline-block overflow-hidden pb-1 mr-[0.15em] sm:mr-[0.2em]">
                 <motion.span 
                   variants={itemVariants}
                   className="inline-block"
@@ -556,14 +536,14 @@ export default function App() {
 
           <motion.p 
             variants={itemVariants}
-            className="max-w-2xl text-neutral-400 text-lg md:text-xl mb-14 leading-relaxed font-light"
+            className="max-w-2xl text-neutral-400 text-sm sm:text-base md:text-xl mb-10 md:mb-14 leading-relaxed font-light px-2"
           >
             {DEFAULT_DATA.bio}
           </motion.p>
           
           <motion.div 
             variants={itemVariants}
-            className="flex items-center gap-8 justify-center"
+            className="flex items-center gap-6 md:gap-8 justify-center"
           >
             <a 
               href={DEFAULT_DATA.socials.github} 
@@ -572,30 +552,135 @@ export default function App() {
               className="text-neutral-500 hover:text-white transition-all transform hover:scale-110" 
               id="hero-github"
             >
-              <Github size={28} />
+              <Github size={24} className="md:w-7 md:h-7" />
             </a>
             <a 
-              href="#contact"
-              className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-neutral-400 hover:text-white transition-colors group"
+              href="#work"
+              className="flex items-center gap-2 text-[11px] md:text-xs font-mono uppercase tracking-widest text-neutral-400 hover:text-white transition-colors group"
             >
               Projekte ansehen
-              <ChevronDown size={14} className="transform -rotate-90 group-hover:translate-x-1 transition-transform" />
+              <ChevronDown size={14} className="transform -rotate-90 group-hover/btn:translate-x-1 transition-transform" />
             </a>
           </motion.div>
         </motion.div>
 
         <motion.div 
-          animate={{ y: [0, 10, 0] }}
+          animate={{ y: [0, 8, 0] }}
           transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          className="mt-32 text-neutral-800"
+          className="mt-16 md:mt-32 text-neutral-800"
         >
-          <ChevronDown size={32} />
+          <ChevronDown size={28} className="md:w-8 md:h-8" />
         </motion.div>
       </section>
 
+      {/* Certificates Section */}
+      <section id="certificates" className="py-16 md:py-24 px-4 sm:px-6 border-t border-neutral-900 bg-neutral-950/20 relative overflow-hidden">
+        {/* Background glow specific to certificates */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <div className="absolute top-[20%] left-[50%] -translate-x-1/2 w-[500px] h-[500px] bg-white/[0.02] rounded-full blur-[120px]" />
+        </div>
+
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 md:mb-16 gap-4 md:gap-8">
+            <motion.div 
+              initial={{ opacity: 0, x: -35 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+              className="text-left"
+            >
+              <h2 className="font-display text-3xl sm:text-5xl md:text-6xl font-bold mb-3 md:mb-4 italic tracking-tighter text-white">Meine Zertifikate:</h2>
+              <p className="text-neutral-500 max-w-md italic uppercase text-xs sm:text-sm tracking-widest">Offizielle Auszeichnungen & verifizierte Qualifikationen.</p>
+            </motion.div>
+            <motion.div 
+              initial={{ scaleX: 0 }}
+              whileInView={{ scaleX: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 1, delay: 0.2 }}
+              className="h-[1px] flex-grow bg-neutral-900 hidden md:block mx-12 mb-4 origin-left" 
+            />
+            <motion.span 
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.4 }}
+              className="font-mono text-xs sm:text-sm text-neutral-700 uppercase hidden md:block mb-4"
+            >
+              Qualifikationen ({filteredCertificates.length})
+            </motion.span>
+          </div>
+
+          {/* Certificate Filter Bar */}
+          <div className="flex gap-3 mb-12 md:mb-16 overflow-x-auto pb-4 scrollbar-hide">
+            {["Alle", "Cisco", "Microsoft", "Google", "HP"].map((company) => (
+              <button
+                key={company}
+                onClick={() => setActiveCertFilter(company)}
+                className={`px-5 py-2.5 rounded-full text-[10px] sm:text-xs font-mono uppercase tracking-[0.18em] transition-all whitespace-nowrap ${
+                  activeCertFilter === company 
+                  ? "bg-white text-black font-bold shadow-[0_0_20px_rgba(255,255,255,0.2)]" 
+                  : "bg-neutral-900 text-neutral-500 hover:text-white hover:bg-neutral-800"
+                }`}
+              >
+                {company}
+              </button>
+            ))}
+          </div>
+
+          {/* Minimalist Grid of Badges */}
+          <div className="flex flex-wrap gap-8 justify-center items-center min-h-[180px] py-4">
+            <AnimatePresence mode="popLayout">
+              {filteredCertificates.length > 0 ? (
+                filteredCertificates.map((cert) => (
+                  <motion.a
+                    key={cert.id}
+                    href={cert.verificationUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    layout
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0 }}
+                    whileHover={{ scale: 1.05 }}
+                    transition={{ duration: 0.3 }}
+                    className="relative flex items-center justify-center overflow-hidden w-[180px] h-[300px] rounded-none border border-neutral-900 bg-neutral-950/20 hover:border-neutral-700 transition-all select-none cursor-pointer"
+                  >
+                    <div className="w-[150px] h-[270px] relative rounded-none overflow-hidden flex items-center justify-center pointer-events-none">
+                      <div className="w-[150px] h-[270px] flex items-center justify-center">
+                        <iframe 
+                          name="acclaim-badge" 
+                          allowTransparency 
+                          frameBorder="0" 
+                          id={`embedded-badge-${cert.id}`} 
+                          scrolling="no" 
+                          src={cert.iframeSrc} 
+                          style={{ width: "150px", height: "270px" }} 
+                          title={cert.title}
+                          className="bg-transparent filter drop-shadow-md pointer-events-none"
+                        />
+                      </div>
+                      <div className="absolute inset-0 bg-transparent z-10" />
+                    </div>
+                  </motion.a>
+                ))
+              ) : (
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="text-neutral-600 font-mono text-xs uppercase tracking-widest text-center py-12"
+                >
+                  Noch keine Zertifikate gelistet
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+      </section>
+
       {/* Work Section */}
-      <section id="work" className="py-20 px-6 max-w-7xl mx-auto overflow-visible">
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8">
+      <section id="work" className="py-16 md:py-20 px-4 sm:px-6 max-w-7xl mx-auto overflow-visible">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 md:mb-16 gap-6 md:gap-8">
           <motion.div 
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -603,8 +688,8 @@ export default function App() {
             transition={{ duration: 0.8 }}
             className="text-left"
           >
-            <h2 className="font-display text-4xl md:text-6xl font-bold mb-4 italic tracking-tighter text-white">Projekte</h2>
-            <p className="text-neutral-500 max-w-md italic uppercase text-sm tracking-widest">Ein Auszug meiner technischen Lösungen und Eigenentwicklungen.</p>
+            <h2 className="font-display text-3xl sm:text-5xl md:text-6xl font-bold mb-3 md:mb-4 italic tracking-tighter text-white">Projekte</h2>
+            <p className="text-neutral-500 max-w-md italic uppercase text-xs sm:text-sm tracking-widest">Ein Auszug meiner technischen Lösungen und Eigenentwicklungen.</p>
           </motion.div>
           <motion.div 
             initial={{ scaleX: 0 }}
@@ -625,12 +710,12 @@ export default function App() {
         </div>
 
         {/* Filter Bar */}
-        <div className="flex flex-wrap gap-3 mb-16 overflow-x-auto pb-4 scrollbar-hide">
+        <div className="flex gap-3 mb-10 md:mb-16 overflow-x-auto pb-4 scrollbar-hide">
           {DEFAULT_DATA.categories.map((cat) => (
             <button
               key={cat}
               onClick={() => setActiveFilter(cat)}
-              className={`px-6 py-2 rounded-full text-xs font-mono uppercase tracking-[0.2em] transition-all whitespace-nowrap ${
+              className={`px-5 py-2.5 rounded-full text-[10px] sm:text-xs font-mono uppercase tracking-[0.18em] transition-all whitespace-nowrap ${
                 activeFilter === cat 
                 ? "bg-white text-black font-bold shadow-[0_0_20px_rgba(255,255,255,0.2)]" 
                 : "bg-neutral-900 text-neutral-500 hover:text-white hover:bg-neutral-800"
@@ -651,7 +736,7 @@ export default function App() {
                 whileInView={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
                 whileHover={{ 
-                  y: -8, 
+                   y: -8, 
                   scale: 1.01, 
                   backgroundColor: "rgba(255, 255, 255, 0.04)",
                   borderColor: "rgba(255, 255, 255, 0.15)",
@@ -664,7 +749,7 @@ export default function App() {
                   scale: { type: "spring", stiffness: 400, damping: 10 },
                   opacity: { duration: 0.6 }
                 }}
-                className={`group p-8 rounded-3xl border transition-all cursor-default flex flex-col h-full ${
+                className={`group p-6 sm:p-8 rounded-[24px] sm:rounded-3xl border transition-all cursor-default flex flex-col h-full ${
                   project.featured 
                   ? "border-neutral-700 bg-neutral-900/40 col-span-1 md:col-span-2 lg:col-span-2" 
                   : "border-neutral-900 bg-neutral-950/50"
@@ -750,66 +835,66 @@ export default function App() {
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -50 }}
-              className="max-w-7xl mx-auto px-6"
+              className="max-w-7xl mx-auto px-4 sm:px-6"
             >
-              <div className="bg-neutral-900/50 rounded-[40px] p-12 md:p-20 border border-neutral-800 relative overflow-hidden">
+              <div className="bg-neutral-900/50 rounded-[24px] sm:rounded-[40px] p-6 sm:p-12 md:p-20 border border-neutral-800 relative overflow-hidden text-left">
                 <div className="absolute top-0 right-0 p-10 opacity-5 pointer-events-none">
                   <Terminal size={300} />
                 </div>
                 
                 <div className="relative z-10">
-                  <div className="flex items-center gap-4 mb-8">
-                    <span className="px-4 py-1 rounded-full border border-neutral-700 font-mono text-[10px] uppercase tracking-widest text-neutral-400">
+                  <div className="flex items-center gap-4 mb-6 md:mb-8">
+                    <span className="px-3.5 py-1 rounded-full border border-neutral-700 font-mono text-[9px] sm:text-[10px] uppercase tracking-widest text-neutral-400">
                       {selectedProject.category}
                     </span>
                     <div className="h-[1px] w-12 bg-neutral-800" />
-                    <span className="text-neutral-500 font-mono text-[10px] uppercase tracking-widest">
+                    <span className="text-neutral-500 font-mono text-[9px] sm:text-[10px] uppercase tracking-widest">
                       ID: {selectedProject.id}
                     </span>
                   </div>
 
-                  <h2 className="text-4xl md:text-7xl font-display font-bold mb-10 tracking-tighter leading-tight">
+                  <h2 className="text-3xl sm:text-5xl md:text-7xl font-display font-bold mb-6 md:mb-10 tracking-tighter leading-tight">
                     {selectedProject.title}
                   </h2>
 
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
                     <div>
-                      <p className="text-xl text-neutral-300 leading-relaxed italic mb-10 font-light">
+                      <p className="text-base sm:text-xl text-neutral-300 leading-relaxed italic mb-6 md:mb-10 font-light">
                         {selectedProject.description}
                       </p>
                       
-                      <div className="flex flex-wrap gap-3 mb-10">
+                      <div className="flex flex-wrap gap-2.5 mb-6 md:mb-10">
                         {selectedProject.tech.map(t => (
-                          <span key={t} className="px-3 py-1 rounded-lg bg-neutral-800 text-xs font-mono text-neutral-400 uppercase">
+                          <span key={t} className="px-3 py-1 rounded-lg bg-neutral-800 text-[10px] sm:text-xs font-mono text-neutral-400 uppercase">
                             {t}
                           </span>
                         ))}
                       </div>
 
-                      <div className="p-8 rounded-2xl bg-neutral-950 border border-neutral-800">
-                        <h4 className="text-sm font-mono uppercase tracking-widest text-neutral-500 mb-4">Projekt Status</h4>
+                      <div className="p-5 sm:p-8 rounded-2xl bg-neutral-950 border border-neutral-800">
+                        <h4 className="text-xs font-mono uppercase tracking-widest text-neutral-500 mb-3 sm:mb-4">Projekt Status</h4>
                         <div className={`flex items-center gap-2 ${selectedProject.status?.includes('Entwicklung') ? 'text-amber-500' : 'text-green-500'}`}>
                           {selectedProject.status?.includes('Entwicklung') ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
-                          <span className="text-sm">{selectedProject.status || 'Abgeschlossen / In Produktion'}</span>
+                          <span className="text-xs sm:text-sm">{selectedProject.status || 'Abgeschlossen / In Produktion'}</span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex flex-col justify-end gap-6">
-                      <p className="text-neutral-500 text-sm leading-relaxed max-w-sm mb-4">
+                    <div className="flex flex-col justify-end gap-4 sm:gap-6">
+                      <p className="text-neutral-500 text-xs sm:text-sm leading-relaxed max-w-sm mb-2 sm:mb-4">
                         {selectedProject.id === 'relay' 
                           ? "Relay befindet sich aktuell in der aktiven Entwicklungsphase. Tritt dem Discord-Server bei, um exklusive Einblicke und Updates zu erhalten."
                           : "Dies ist eine detaillierte Übersicht des Projekts. Hier könnten weitere Informationen wie Herausforderungen, Lösungen und Metriken stehen."
                         }
                       </p>
                       
-                      <div className="flex flex-col gap-4">
+                      <div className="flex flex-col gap-3 sm:gap-4">
                         {selectedProject.link && (
                           <a 
                             href={selectedProject.link}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="bg-white text-black px-8 py-4 rounded-xl font-bold hover:bg-neutral-200 transition-all text-center flex items-center justify-center gap-2"
+                            className="bg-white text-black px-6 py-3.5 rounded-xl font-bold hover:bg-neutral-200 transition-all text-center flex items-center justify-center gap-2 text-xs sm:text-sm uppercase tracking-wider font-mono shadow-md"
                           >
                             Live Demo besuchen
                           </a>
@@ -820,16 +905,16 @@ export default function App() {
                             href={selectedProject.discordInvite}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="bg-[#5865F2] text-white px-8 py-4 rounded-xl font-bold hover:bg-[#4752c4] transition-all text-center flex items-center justify-center gap-2"
+                            className="bg-[#5865F2] text-white px-6 py-3.5 rounded-xl font-bold hover:bg-[#4752c4] transition-all text-center flex items-center justify-center gap-2 text-xs sm:text-sm uppercase tracking-wider font-mono shadow-md"
                           >
-                            <MessageSquare size={18} />
+                            <MessageSquare size={16} />
                             Discord Server joinen
                           </a>
                         )}
 
                         <button 
                           onClick={() => setSelectedProject(null)}
-                          className="border border-neutral-800 px-8 py-4 rounded-xl font-bold hover:bg-neutral-800 transition-all text-center"
+                          className="border border-neutral-800 px-6 py-3.5 rounded-xl font-bold hover:bg-neutral-800 transition-all text-center text-xs sm:text-sm uppercase tracking-wider font-mono text-neutral-400 hover:text-white"
                         >
                           Schließen
                         </button>
@@ -843,7 +928,7 @@ export default function App() {
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="text-center py-20 text-neutral-800 italic"
+              className="text-center py-20 text-neutral-800/40 italic"
             >
               <p>Wähle ein Projekt aus, um Details zu sehen.</p>
             </motion.div>
@@ -851,7 +936,7 @@ export default function App() {
         </AnimatePresence>
       </section>
 
-      {/* Skills Section */}
+{/* Skills Section */}
       <section id="skills" className="py-20 px-6 bg-neutral-900/30">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
@@ -882,32 +967,18 @@ export default function App() {
         </div>
       </section>
 
-      {/* Contact Section */}
-      <section id="contact" className="py-32 px-6 max-w-3xl mx-auto text-center border-t border-neutral-900 mt-20">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-        >
-          <h2 className="font-display text-5xl md:text-7xl font-bold mb-8 tracking-tighter text-white">Lass uns reden.</h2>
-          <p className="text-neutral-400 mb-12 text-lg">
-            Hast du ein Projekt im Kopf oder willst du einfach nur Hallo sagen? Schreib mir unten.
-          </p>
-
-          <ContactForm />
-        </motion.div>
-      </section>
 
       {/* Footer */}
-      <footer className="py-10 px-6 border-t border-neutral-900">
+      <footer className="py-10 px-6 border-t border-neutral-900 mt-20">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
           <p className="text-neutral-600 text-sm">
             © {new Date().getFullYear()} FLAZZY.DE — DESIGNED BY AI
           </p>
           <div className="flex flex-wrap justify-center gap-x-8 gap-y-4 text-neutral-600 text-sm italic">
+            <a href="#certificates" className="hover:text-white transition-colors uppercase tracking-wider">Zertifikate</a>
             <a href="#work" className="hover:text-white transition-colors uppercase tracking-wider">Projekte</a>
             <a href="#skills" className="hover:text-white transition-colors uppercase tracking-wider">Skills</a>
-            <a href="#contact" className="hover:text-white transition-colors uppercase tracking-wider">Kontakt</a>
+            <a href={`mailto:${DEFAULT_DATA.socials.email}`} className="hover:text-white transition-colors uppercase tracking-wider">Kontakt</a>
             <a href={DEFAULT_DATA.socials.github} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors uppercase tracking-wider">GitHub</a>
           </div>
         </div>
@@ -921,11 +992,11 @@ export default function App() {
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
         whileHover={{ scale: 1.05 }}
-        className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-neutral-900/80 backdrop-blur-md border border-neutral-800 px-4 py-2 rounded-full shadow-2xl group hover:border-neutral-500 transition-all"
+        className="fixed bottom-4 left-4 sm:bottom-6 sm:left-6 z-50 flex items-center gap-2 bg-neutral-900/80 backdrop-blur-md border border-neutral-800 px-3.5 py-2 rounded-full shadow-2xl group hover:border-neutral-500 transition-all"
         id="flazzy-watermark"
       >
-        <div className="w-2 h-2 rounded-full bg-neutral-500 group-hover:bg-white animate-pulse transition-colors" />
-        <span className="text-[10px] font-mono tracking-widest text-neutral-500 group-hover:text-white uppercase transition-colors">
+        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-neutral-500 group-hover:bg-white animate-pulse transition-colors" />
+        <span className="text-[9px] sm:text-[10px] font-mono tracking-widest text-neutral-500 group-hover:text-white uppercase transition-colors">
           Flazzy Web AI
         </span>
       </motion.a>
@@ -940,11 +1011,11 @@ export default function App() {
             whileHover={{ scale: 1.1, backgroundColor: "#fff", color: "#000" }}
             whileTap={{ scale: 0.9 }}
             onClick={scrollToTop}
-            className="fixed bottom-24 right-6 z-50 p-4 rounded-full bg-neutral-900 border border-neutral-800 text-white shadow-2xl transition-colors backdrop-blur-md"
+            className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 p-3 sm:p-4 rounded-full bg-neutral-900/80 border border-neutral-800 text-white shadow-2xl transition-colors backdrop-blur-md hover:border-neutral-500"
             aria-label="Scroll to top"
             id="scroll-to-top"
           >
-            <ArrowUp size={20} />
+            <ArrowUp size={18} className="sm:w-5 sm:h-5" />
           </motion.button>
         )}
       </AnimatePresence>
